@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二叉树可视化分析器</title>
+  <link rel="stylesheet" href="样式.css">
+</head>
+<body>
+
+  <!-- 头部 -->
+  <header class="header">
+    <h1>🌳 二叉树可视化分析器</h1>
+    <p>输入层序数据，自动构建二叉树并进行多角度分析</p>
+  </header>
+
+  <!-- 主容器 -->
+  <div class="container">
+
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+
+      <!-- 数据输入 -->
+      <div class="card">
+        <div class="card-title">📥 二叉树的创建</div>
+        <div class="input-group">
+          <label>层序数据（null 表示空节点）</label>
+          <input type="text" id="treeInput" placeholder="例如: 8,4,12,2,6,10,14,null,null,5,7">
+          <div class="hint">支持格式: [8,4,12] 或 8,4,12 或 8 4 12</div>
+        </div>
+        <div class="presets">
+          <button class="preset-btn" onclick="usePreset('[8,4,12,2,6,10,14,null,null,5,7]')">示例1</button>
+          <button class="preset-btn" onclick="usePreset('[1,2,3,4,5,6,7]')">满二叉树</button>
+          <button class="preset-btn" onclick="usePreset('[1,2,3,4,5,null,7]')">完全树</button>
+          <button class="preset-btn" onclick="usePreset('[10,5,15,3,7,12,20]')">BST</button>
+          <button class="preset-btn" onclick="usePreset('[3,9,20,null,null,15,7]')">平衡树</button>
+        </div>
+        <button class="btn btn-primary" onclick="createTree()" style="margin-top: 10px;">🚀 创建二叉树</button>
+        <button class="btn btn-danger" onclick="clearTree()">🗑️ 清空</button>
+      </div>
+
+      <!-- 路径查找 -->
+      <div class="card">
+        <div class="card-title">🔍 路径相关功能</div>
+        <div class="input-group">
+          <label>目标值</label>
+          <input type="text" id="searchValue" placeholder="输入要查找的值">
+        </div>
+        <button class="btn btn-success" onclick="searchValue()">🔎 查找路径</button>
+        <div id="searchResult"></div>
+      </div>
+
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main">
+
+      <!-- Canvas 可视化 -->
+      <div class="card visual-section">
+        <div class="card-title">🎨 图形可视化</div>
+        <canvas id="treeCanvas"></canvas>
+      </div>
+
+      <!-- 文本可视化 -->
+      <div class="card">
+        <div class="card-title">📝 文本可视化</div>
+        <pre class="text-visual" id="textVisual">(空树)</pre>
+      </div>
+
+      <!-- 遍历结果 -->
+      <div class="card">
+        <div class="card-title">🔄 遍历结果（递归版 + 非递归版）</div>
+        <div class="traversal-results">
+          <div class="traversal-item">
+            <div class="label">前序遍历（递归）</div>
+            <div class="value" id="preorder">-</div>
+          </div>
+          <div class="traversal-item">
+            <div class="label">前序遍历（非递归）</div>
+            <div class="value" id="preorderNonRec">-</div>
+          </div>
+          <div class="traversal-item">
+            <div class="label">中序遍历（递归）</div>
+            <div class="value" id="inorder">-</div>
+          </div>
+          <div class="traversal-item">
+            <div class="label">中序遍历（非递归）</div>
+            <div class="value" id="inorderNonRec">-</div>
+          </div>
+          <div class="traversal-item">
+            <div class="label">后序遍历（递归）</div>
+            <div class="value" id="postorder">-</div>
+          </div>
+          <div class="traversal-item">
+            <div class="label">后序遍历（非递归）</div>
+            <div class="value" id="postorderNonRec">-</div>
+          </div>
+          <div class="traversal-item" style="grid-column: span 2;">
+            <div class="label">层序遍历</div>
+            <div class="value" id="levelorder">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 结构分析 -->
+      <div class="card">
+        <div class="card-title">📊 结构分析</div>
+        <div class="results-grid">
+          <div class="result-item">
+            <div class="label">节点总数</div>
+            <div class="value" id="nodeCount">-</div>
+          </div>
+          <div class="result-item">
+            <div class="label">叶子节点数量</div>
+            <div class="value" id="leafCount">-</div>
+          </div>
+          <div class="result-item">
+            <div class="label">树的高度</div>
+            <div class="value" id="treeHeight">-</div>
+          </div>
+          <div class="result-item">
+            <div class="label">最宽的一层宽度</div>
+            <div class="value" id="maxWidth">-</div>
+          </div>
+          <div class="result-item" style="grid-column: span 2;">
+            <div class="label">每一层的节点数量</div>
+            <div class="value" id="nodesPerLevel">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 性质判断 -->
+      <div class="card">
+        <div class="card-title">✅ 性质判断</div>
+        <div class="results-grid">
+          <div class="result-item">
+            <div class="label">是否为空树</div>
+            <div class="value" id="isEmpty">-</div>
+          </div>
+          <div class="result-item">
+            <div class="label">是否为满二叉树</div>
+            <div class="value" id="isFull">-</div>
+          </div>
+          <div class="result-item">
+            <div class="label">是否为完全二叉树</div>
+            <div class="value" id="isComplete">-</div>
+          </div>
+          <div class="result-item">
+            <div class="label">是否为平衡二叉树</div>
+            <div class="value" id="isBalanced">-</div>
+          </div>
+          <div class="result-item" style="grid-column: span 2;">
+            <div class="label">是否为二叉搜索树（BST）</div>
+            <div class="value" id="isBST">-</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="二叉树逻辑.js"></script>
+
+</body>
+</html>
